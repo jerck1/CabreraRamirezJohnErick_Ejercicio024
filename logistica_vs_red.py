@@ -190,7 +190,7 @@ plt.savefig("loss_f1.png")
 # dos capa
 
 
-# In[46]:
+# In[58]:
 
 
 #Number of neurons
@@ -209,7 +209,7 @@ f1_s_test=np.zeros((len(n1)+1,len(n2)+1))
 #np.shape(f1_s_train)
 
 
-# In[49]:
+# In[62]:
 
 
 for i in n1:
@@ -224,30 +224,56 @@ for i in n1:
         #print('Loss', mlp.loss_)#entropía relativa, divergencia
 
 
-# In[51]:
+# In[84]:
 
 
-f1_s_test
+# Regresión logísitica utilizando l1
 
 
-# In[52]:
+# In[106]:
 
 
-plt.figure(1,figsize = (10,10))
-plt.subplot(1,2,1)
-plt.plot(n,loss)
-plt.xlabel('n neurons')
-plt.ylabel('loss')
-plt.subplot(1,2,2)
-plt.plot(n,f1_s_train[0,:],label="train")
-plt.plot(n,f1_s_test[0,:],label="test")
-plt.xlabel('n neurons')
-plt.ylabel('f_1 score')
-plt.savefig("loss_f1.png")
+# Turn up tolerance for faster convergence
+train_samples = int(np.shape(Y)[0]*0.5)
+f1_av_1=[]
+#regresión logística sobre los dígitos
+for i in np.log(np.arange(np.e,1000,10)):
+    clf = LogisticRegression(
+        C=i, penalty='l1', solver='saga', tol=0.1)
+        #C=50. / train_samples, penalty='l1', solver='saga', tol=0.1)#,multi_class='multinomial'
+    clf.fit(x_train, y_train)
+    y_pred=clf.predict(x_test)
+    f1_av_1=np.append(f1_av_1,f1_score(y_test,y_pred, average='weighted'))
 
 
-# In[ ]:
+# In[108]:
 
 
+plt.scatter(np.log(np.arange(np.e,1000,10)),f1_av_1,label="f1")
+#plt.scatter(np.arange(1,10),f1_av_1,label="f1")
 
 
+# In[96]:
+
+
+for i in n1:
+#for i in range(3,5):
+    plt.figure(1,figsize = (8,8))
+    #plt.subplot(1,2,1)
+    #plt.plot(n,loss)
+    plt.xlabel('n neurons')
+    plt.ylabel('loss')
+    #plt.subplot(1,7,i)
+    plt.plot(n2,f1_s_train[i,:6],label="train {} redes 1ra capa".format(i))
+    plt.plot(n2,f1_s_test[i,:6],label="test {} redes 1ra capa".format(i))
+    plt.xlabel('n neurons')
+    plt.ylabel('f_1 score')
+plt.hlines(0.85548043,min(n2),max(n2),label="logistic model")
+plt.legend(loc=(1.05,0.25))
+    #plt.savefig("loss_f1.png")
+
+
+# # Discusión
+
+# * En mi caso los resultados no fueron tan buenos cuando se con las redes neuronales que al aplicar la regresión logística.
+# * 
